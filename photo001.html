@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="manifest" href="manifest.json">
+<script>
+  navigator.serviceWorker.register("service-worker.js");
+</script>
+
+<meta charset="UTF-8">
+<title>すてきフォトフレーム</title>
+<style>
+  body, html {
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+    height: 100%;
+  }
+  img {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+  }
+  #controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <input id="files" type="file" multiple accept="image/*,audio/*">
+  <button id="startBtn">再生開始</button>
+</div>
+
+<img id="viewer">
+<audio id="bgm" loop></audio>
+
+<script>
+const fileInput = document.getElementById("files");
+const startBtn = document.getElementById("startBtn");
+const viewer = document.getElementById("viewer");
+const bgm = document.getElementById("bgm");
+
+let images = [];
+let music = null;
+
+fileInput.onchange = () => {
+  const files = [...fileInput.files];
+  images = files.filter(f => f.type.startsWith("image/"));
+  music = files.find(f => f.type.startsWith("audio/"));
+};
+
+startBtn.onclick = () => {
+  if (music) {
+    bgm.src = URL.createObjectURL(music);
+    bgm.play(); // Safariはここで初めて再生許可
+  }
+  showNext();
+  setInterval(showNext, 5000);
+};
+
+function showNext() {
+  if (images.length === 0) return;
+  const file = images[Math.floor(Math.random() * images.length)];
+  viewer.src = URL.createObjectURL(file);
+}
+</script>
+
+</body>
+</html>
