@@ -1,50 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <link rel="manifest" href="manifest.json">
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>🐸はじめてのHTML</title>
 </head>
 <body>
 
-<div id="controls">
-  <input id="files" type="file" multiple accept="image/*,audio/*">
-  <button id="startBtn">再生開始</button>
-</div>
+  <p>ボタン押してみよう</p>
 
-<img id="viewer">
-<audio id="bgm" loop></audio>
+  <button>🐸</button>
 
-<script>
-const fileInput = document.getElementById("files");
-const startBtn = document.getElementById("startBtn");
-const viewer = document.getElementById("viewer");
-const bgm = document.getElementById("bgm");
-
-let images = [];
-let music = null;
-
-fileInput.onchange = () => {
-  const files = [...fileInput.files];
-  images = files.filter(f => f.type.startsWith("image/"));
-  music = files.find(f => f.type.startsWith("audio/"));
-};
-
-startBtn.onclick = () => {
-  if (music) {
-    bgm.src = URL.createObjectURL(music);
-    bgm.play(); // Safariはここで初めて再生許可
-  }
-  showNext();
-  setInterval(showNext, 5000);
-};
-
-function showNext() {
-  if (images.length === 0) return;
-  const file = images[Math.floor(Math.random() * images.length)];
-  viewer.src = URL.createObjectURL(file);
-}
-</script>
+  <p>ごくろうさまでした。</p>
 
 </body>
 </html>
