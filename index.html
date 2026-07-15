@@ -1,22 +1,140 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>🐸はじめてのHTML</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json">
+<script>
+  navigator.serviceWorker.register("service-worker.js");
+</script>
 
-  <script>
-    navigator.serviceWorker.register("service-worker.js");
-  </script>
+<title>すてきフォルダアルバム</title>
+
+<style>
+  body, html {
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+    height: 100%;
+    touch-action: none; /* フリック操作のため */
+  }
+
+  #viewer {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    transition: opacity 0.5s;
+  }
+
+  #controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #controls input[type="file"],
+  #controls button {
+    font-size: 24px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: #333;
+    color: #fff;
+    border: none;
+    margin-bottom: 10px;
+  }
+</style>
 </head>
 <body>
 
-  <p>ボタン押してみよう</p>
+<div id="controls">
+  <input id="files" type="file" webkitdirectory multiple accept="image/*,audio/*">
+  <button id="startBtn">再生開始</button>
+</div>
 
-  <button>🐸</button>
+<img id="viewer">
+<audio id="bgm" loop></audio>
 
-  <p>ごくろうさまでした。</p>
+<script>
+const fileInput = document.getElementById("files");
+const startBtn = document.getElementById("startBtn");
+const viewer = document.getElementById("viewer");
+const bgm = document.getElementById("bgm");
+
+let images = [];
+let music = null;
+
+let index = 0;
+let playing = true;
+let slideshowTimer = null;
+
+/* フォルダ読み込み */
+fileInput.onchange = () => {
+  const files = [...fileInput.files];
+  images = [];
+  music = null;
+
+  for (const file of files) {
+    if (file.type.startsWith("image/")) images.push(file);
+    if (file.type.startsWith("audio/")) music = file;
+  }
+};
+
+/* スライドショー開始 */
+startBtn.onclick = () => {
+  if (images.length === 0) return;
+
+  if (music) {
+    bgm.src = URL.createObjectURL(music);
+    bgm.play();
+  }
+
+  showNext();
+  slideshowTimer = setInterval(() => {
+    if (playing) showNext();
+  }, 5000);
+};
+
+/* ランダム表示 */
+function showNext() {
+  index = Math.floor(Math.random() * images.length);
+  viewer.style.opacity = 0;
+  setTimeout(() => {
+    viewer.src = URL.createObjectURL(images[index]);
+    viewer.style.opacity = 1;
+  }, 200);
+}
+
+/* 前の画像（ランダムでなく戻す） */
+function showPrev() {
+  index = (index - 1 + images.length) % images.length;
+  viewer.src = URL.createObjectURL(images[index]);
+}
+
+/* タップで一時停止／再開 */
+viewer.addEventListener("click", () => {
+  playing = !playing;
+});
+
+/* フリック操作 */
+let startX = 0;
+
+viewer.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+viewer.addEventListener("touchend", e => {
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if (diff > 50) showPrev();   // 右フリック → 戻る
+  if (diff < -50) showNext();  // 左フリック → 進む
+});
+</script>
 
 </body>
 </html>
